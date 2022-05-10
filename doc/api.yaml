@@ -1,0 +1,522 @@
+openapi: 3.0.0
+info:
+  title: Post services
+  description: ну и жижа
+  version: 2.2.7
+  
+servers:
+  - url: /
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+        posts:
+          type: array
+          properties:
+            id:
+              type: string
+            title:
+              type: string
+            text:
+              type: string
+    Post:
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        text:
+          type: string
+        userId:
+          type: string
+        commentsId:
+          type: string
+    Comment:
+      required:
+        - title
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        userId:
+          type: string
+        postId:
+          type: string
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+  
+paths:
+  /users:
+    get:
+      tags:
+        - Users
+      summary:  Вернуть всех пользователей в системе
+      description: на паре только гардейчик
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - Users
+      summary: Cоздать пользователя
+      description: Блин так круто писать на 3kспpессe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                name:
+                  type: string
+                  description: The user's name
+                login:
+                  type: string
+                  description: The user's login
+                password:
+                  type: string
+                  description: The user's password
+              required:
+                - name
+      responses:
+        201:
+          description: The user has been created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /users/{userId}/comments/:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Users
+      summary: Вернуть все комменты, написанные пользователем
+      description: Пишу руками на сваггере как динозавр
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /users/{userId}/posts:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Users
+      summary: Вернуть все посты, написанные пользователем
+      description: nest для слабых, express для сутулых мужиков
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /users/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+    
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Gets a user by ID
+        e.g. “/users/123” (remove password from response)
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: User not found
+    put:
+      tags:
+        - Users
+      summary:  Обновить пользователя с заданным id
+      description: Updates a user by ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                name:
+                  type: string
+                  description: The user's name
+                login:
+                  type: string
+                  description: The user's login
+                password:
+                  type: string
+                  description: The user's password
+              required:
+                - name
+      responses:
+        200:
+          description: The user has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      tags:
+        - Users
+      summary: Удалить пользователя с заданным id
+      description: вот бы уметь генерировать сwваgгер
+      responses:
+        204:
+          description: The user has been deleted
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: User not found
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary:  Вернуть все посты в системе
+      description: ммм Арч линукс
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - Posts
+      summary: Cоздать новый пост 
+      description: Creates a new board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                title:
+                  type: string
+                  description: The post title
+                text:
+                  type: string
+                  description: the post content
+                userId:
+                  type: string
+                  description: Written by
+      responses:
+        201:
+          description: The board has been created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /posts/{postId}/users/:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Posts
+      summary: Вернуть пользователя, который создал пост с заданным id
+      description: хачу IoC
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: User not found
+  /posts/{postId}:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Posts
+      summary: Вернуть пост с заданным id
+      description: сколько сваггер програмистов надо, что-бы поменять лампочку?
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: Board not found
+  
+    put:
+      tags:
+        - Posts
+      summary: Обновить пост с заданным id
+      description: напоминание- убрать странные коментарии
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                title:
+                  type: string
+                  description: The board's name
+                columns:
+                  type: array
+                  description: The board's column list
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: column's id
+                      title:
+                        type: string
+                        description: column's title
+                      order:
+                        type: integer
+                  required:
+                    - title
+                    - order
+              required:
+                - title
+                - columns
+      responses:
+        200:
+          description: The board has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      tags:
+        - Posts
+      summary: Удалить пост с заданным id
+      description: умножение на нуль
+      responses:
+        204:
+          description: The board has been deleted
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: Board not found
+
+  /comments:
+    get:
+      tags:
+        - Comments
+      summary:  Dернуть все комментарии в системе
+      description: Я фанат shit  и express
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - Comments
+      summary: Cоздать новый cumment 
+      description: Creates a new board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                text:
+                  type: string
+                  description: The post text
+                userId:
+                  type: string
+                  description: user Id
+                postId:
+                  type: string
+                  description: post Id
+      responses:
+        201:
+          description: The board has been created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+  /comments/{commentId}:
+    parameters:
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Comments
+      summary: Вернуть комм с заданным id
+      description: нужно сделать лабу по фалько
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: Board not found
+  
+    put:
+      tags:
+        - Comments
+      summary: Обновить комм с заданным id
+      description: и до Дворниковой
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                title:
+                  type: string
+                  description: The board's name
+                columns:
+                  type: array
+                  description: The board's column list
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: column's id
+                      title:
+                        type: string
+                        description: column's title
+                      order:
+                        type: integer
+                  required:
+                    - title
+                    - order
+              required:
+                - title
+                - columns
+      responses:
+        200:
+          description: The board has been updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        400:
+          description: Bad request
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      tags:
+        - Comments
+      summary: Удалить пост с заданным id
+      description: пустата
+      responses:
+        204:
+          description: The board has been deleted
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: Board not found
