@@ -1,13 +1,16 @@
-const { StatusCodes } = require('http-status-codes');
-const router = require('express').Router({ mergeParams: true });
-const Post = require('./post.model');
-const User = require('../users/user.model')
-const Comment = require('../comments/comment.model')
+import { StatusCodes } from 'http-status-codes';
+import { Request, Response, Router} from 'express';
 
-const postService = require('./post.service');
+import Post from './post.model';
+import User from '../users/user.model';
+import Comment from '../comments/comment.model';
+
+import postService from './post.service';
+
+const router = Router({mergeParams: true});
 
 router.route('/').get(
-    async (req, res) => {
+    async (_req: Request, res: Response) => {
         const posts = await postService.getAll();
 
         res.json(posts.map(Post.toResponse));
@@ -15,7 +18,7 @@ router.route('/').get(
 )
 
 router.route('/').post( 
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         // const {userId} = req.params;
         const {title, text, createdAt, userId, commentsId} = req.body;
         const post = await postService.createPost({title, text, createdAt, userId, commentsId})
@@ -27,10 +30,10 @@ router.route('/').post(
 })
 
 router.route('/:id').get(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
 
-        const post = await postService.getById(id);
+        const post = await postService.getById(id||'');
 
         if(post){
             res.json(Post.toResponse(post));
@@ -41,10 +44,10 @@ router.route('/:id').get(
 )
 
 router.route('/:id/user').get(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
 
-        const user = await postService.getUserByPostId(id);
+        const user = await postService.getUserByPostId(id||'');
         if(user){
             res.json(User.toResponse(user));
         } else {
@@ -54,10 +57,10 @@ router.route('/:id/user').get(
 )
 
 router.route('/:id/comments').get(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
 
-        const comments = await postService.getByCommentId(id);
+        const comments = await postService.getByCommentId(id||'');
 
         if(comments){
             res.json(Comment.toResponse(comments));
@@ -68,11 +71,11 @@ router.route('/:id/comments').get(
 )
 
 router.route('/:id').put(
-    async(req, res) => {
+    async(req: Request, res: Response) => {
         const {id} = req.params;
         const {title, text, createdAt, userId, commentsId} = req.body;
 
-        const post = await postService.updateById({id, title, text, createdAt, userId, commentsId})
+        const post = await postService.updateById({id:id||'', title, text, createdAt, userId, commentsId})
 
         if(post){
             res.status(StatusCodes.OK).json(Post.toResponse(post))
@@ -83,9 +86,9 @@ router.route('/:id').put(
 )
 
 router.route('/:id').delete( 
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
-        const post = await postService.deleteById(id);
+        const post = await postService.deleteById(id||'');
 
         if(post) {
             res.status(StatusCodes.NO_CONTENT).json({code: 'post deleted', msg: "post deleted"})
@@ -94,4 +97,4 @@ router.route('/:id').delete(
         }
 })
 
-module.exports = router;
+export default router;

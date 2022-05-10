@@ -1,18 +1,21 @@
-const { StatusCodes } = require('http-status-codes');
-const router = require('express').Router();
-const User = require('./user.model');
-const Post = require('../posts/post.model');
-const Comment = require('../comments/comment.model');
+import { StatusCodes } from 'http-status-codes';
+import { Request, Response, Router} from 'express';
 
-const usersService = require('./user.service');
+import User from './user.model';
+import Post from '../posts/post.model';
+import Comment from '../comments/comment.model';
 
-router.route('/').get(async (req, res) => {
+import usersService from './user.service';
+
+const router = Router();
+
+router.route('/').get(async (_req: Request, res: Response) => {
   const users = await usersService.getAll();
-  // map user fields to exclude secret fields like "password"
+
   res.json(users.map(User.toResponse));
 });
 
-router.route('/').post( async (req, res) => {
+router.route('/').post( async (req: Request, res: Response) => {
   const {email, name, password, salt, posts, comments} = req.body;
 
   const user = await usersService.createUser({email, name, password, salt, posts, comments});
@@ -24,9 +27,9 @@ router.route('/').post( async (req, res) => {
   }
 })
 
-router.route('/:id').get(async (req, res)=>{
+router.route('/:id').get(async (req: Request, res: Response)=>{
   const {id} = req.params;
-  const user = await usersService.getById(id);
+  const user = await usersService.getById(id||'');
 
   if(user){
     res.json(User.toResponse(user))
@@ -35,10 +38,10 @@ router.route('/:id').get(async (req, res)=>{
   }
 })
 
-router.route('/:id/posts').get(async (req, res)=>{
+router.route('/:id/posts').get(async (req: Request, res: Response)=>{
   const {id} = req.params;
   
-  const posts = await usersService.getAllPostsByUserId(id);
+  const posts = await usersService.getAllPostsByUserId(id||'');
 
   if(posts){
     res.json(Post.toResponse(posts))
@@ -47,10 +50,10 @@ router.route('/:id/posts').get(async (req, res)=>{
   }
 })
 
-router.route('/:id/comments').get(async (req, res)=>{
+router.route('/:id/comments').get(async (req: Request, res: Response)=>{
   const {id} = req.params;
 
-  const comments = await usersService.getAllCommentsByUserId(id);
+  const comments = await usersService.getAllCommentsByUserId(id||'');
 
   if(comments){
     res.json(Comment.toResponse(comments))
@@ -61,11 +64,11 @@ router.route('/:id/comments').get(async (req, res)=>{
 
 
 
-router.route('/:id').put( async (req, res) => {
+router.route('/:id').put( async (req: Request, res: Response) => {
   const {id} = req.params;
   const {email, name, password, salt, posts, comments} = req.body;
 
-  const user = await usersService.updateById({id, email, name, password, salt, posts, comments})
+  const user = await usersService.updateById({id: id||'', email, name, password, salt, posts, comments})
 
   if (user) {
     res.status(StatusCodes.OK).json(User.toResponse(user));
@@ -74,10 +77,10 @@ router.route('/:id').put( async (req, res) => {
   }
 })
 
-router.route('/:id').delete( async (req, res) => {
+router.route('/:id').delete( async (req: Request, res: Response) => {
   const {id} = req.params;
 
-  const user = await usersService.deleteById(id);
+  const user = await usersService.deleteById(id||'');
 
   if(!user){
     return res.status(StatusCodes.NOT_FOUND).json({ code: 'USER_NOT_FOUND', msg: 'User not found' });
@@ -87,4 +90,4 @@ router.route('/:id').delete( async (req, res) => {
 })
 
 
-module.exports = router;
+export default router;

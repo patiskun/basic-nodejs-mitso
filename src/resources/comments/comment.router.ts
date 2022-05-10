@@ -1,13 +1,16 @@
-const { StatusCodes } = require('http-status-codes');
-const router = require('express').Router();
-const Comment = require('./comment.model');
-const User = require('../users/user.model')
-const Post = require('../posts/post.model')
+import { StatusCodes } from 'http-status-codes';
+import { Request, Response, Router} from 'express';
 
-const commentService = require('./comment.service');
+import Comment from './comment.model';
+import User from '../users/user.model'
+import Post from '../posts/post.model'
+
+import commentService from './comment.service';
+
+const router = Router();
 
 router.route('/').get(
-    async (req, res) => {
+    async (_req: Request, res: Response) => {
         const comment = await commentService.getAll();
 
         res.json(comment.map(Comment.toResponse))
@@ -15,10 +18,10 @@ router.route('/').get(
 )
 
 router.route('/').post(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         // const {postId} = req.params;
-        const {id, text, createdAt, userId, postId}= req.body;
-        const comment = await commentService.createComment({id, text, createdAt, userId, postId});
+        const {text, createdAt, userId, postId}= req.body;
+        const comment = await commentService.createComment({text, createdAt, userId, postId});
 
         if(comment){
             res.status(StatusCodes.CREATED).json(Comment.toResponse(comment));
@@ -29,9 +32,9 @@ router.route('/').post(
 )
 
 router.route('/:id').get(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
-        const comment = await commentService.getById(id);
+        const comment = await commentService.getById(id||'');
 
         if(comment){
             res.json(Comment.toResponse(comment));
@@ -42,9 +45,9 @@ router.route('/:id').get(
 )
 
 router.route('/:id/user').get(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
-        const user = await commentService.getUserByCommentId(id);
+        const user = await commentService.getUserByCommentId(id||'');
 
         if(user){
             res.json(User.toResponse(user));
@@ -55,9 +58,9 @@ router.route('/:id/user').get(
 )
 
 router.route('/:id/post').get(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
-        const post = await commentService.getPostByCommentId(id);
+        const post = await commentService.getPostByCommentId(id||'');
 
         if(post){
             res.json(Post.toResponse(post));
@@ -69,11 +72,11 @@ router.route('/:id/post').get(
 
 
 router.route('/:id').put(
-    async (req, res) => {
+    async (req:Request, res:Response) => {
         const {id} = req.params;
         const {text, createdAt, userId, postId} = req.body;
 
-        const comment = await commentService.updateById({id, text, createdAt, userId, postId})
+        const comment = await commentService.updateById({id: id||'', text, createdAt, userId, postId})
 
         if(comment){
             res.status(StatusCodes.OK).json(Comment.toResponse(comment))
@@ -84,10 +87,10 @@ router.route('/:id').put(
 )
 
 router.route('/:id').delete(
-    async (req, res) => {
+    async (req: Request, res: Response) => {
         const {id} = req.params;
 
-        const comment = await commentService.deleteById(id)
+        const comment = await commentService.deleteById(id||'')
 
         if(comment){
             return res.status(StatusCodes.NO_CONTENT).json({code:"Comment_Deleted", msg:'comment deleted'})
@@ -98,4 +101,4 @@ router.route('/:id').delete(
     }
 )
 
-module.exports = router
+export default router;
