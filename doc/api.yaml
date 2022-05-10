@@ -3,7 +3,7 @@ info:
   title: Post services
   description: ну и жижа
   version: 2.2.7
-  
+
 servers:
   - url: /
 
