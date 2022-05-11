@@ -11,7 +11,6 @@ const router = Router();
 
 router.route('/').get(async (_req: Request, res: Response) => {
   const users = await usersService.getAll();
-
   res.json(users.map(User.toResponse));
 });
 
@@ -58,7 +57,7 @@ router.route('/:id/comments').get(async (req: Request, res: Response)=>{
   if(comments){
     res.json(Comment.toResponse(comments))
   } else {
-    res.status(StatusCodes.NOT_FOUND).json({code: 'POST_NOT_FOUND', msg: 'post not found'})
+    res.status(StatusCodes.NOT_FOUND).json({code: 'COMMENTS_NOT_FOUND', msg: 'comments not found'})
   }
 })
 
