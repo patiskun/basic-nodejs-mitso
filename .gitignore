@@ -2,3 +2,4 @@ node_modules
 doc/jsdoc
 /build
 .vscode
+src/logs
